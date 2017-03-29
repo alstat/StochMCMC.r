@@ -28,8 +28,9 @@ y_i = w_0 + w_1 x_i + e_i,   e_i ~ N(0, 1 / a)
 To do so, let `B = [w_0, w_1]' = [.2, -.9]', a = 1 / 5`. Generate 200 hypothetical data:
 
 ```R
-library(StochMCMC)
+library(gridExtra)
 library(lattice)
+library(StochMCMC)
 
 set.seed(123)
 
@@ -80,8 +81,8 @@ To start programming, define the probabilities
 ```julia
 # The log prior function is given by the following codes:
 logprior <- function(theta, mu = zero_vec, s = eye_mat) {
-    w0_prior <- dnorm(theta[1], mu[1, 1], s[1, 1], log = TRUE)
-    w1_prior <- dnorm(theta[2], mu[2, 1], s[2, 2], log = TRUE)
+    w0_prior <- dnorm(theta[1], mu[1], s[1, 1], log = TRUE)
+    w1_prior <- dnorm(theta[2], mu[2], s[2, 2], log = TRUE)
     w_prior <- c(w0_prior, w1_prior)
 
     w_prior %>% sum %>% return
@@ -112,101 +113,138 @@ zero_vec <- c(0, 0)
 eye_mat <- diag(2)
 ```
 Run the MCMC:
-```julia
+```R
 set.seed(123);
-mh_object <- MH(logpost, init_est = zeros(2))
+mh_object <- MH(logpost, init_est = c(0, 0))
 chain1 <- mcmc(mh_object, r = 10000)
 ```
 Extract the estimate
-```julia
-burn_in = 100;
-thinning = 10;
+```R
+burn_in <- 100;
+thinning <- 10;
 
 # Expetation of the Posterior
-est1 = mapslices(mean, chain1[(burn_in + 1):thinning:end, :], [1]);
+est1 = colMeans(chain1[seq((burn_in + 1), nrow(chain1), by = thinning), ])
 est1
-# 1×2 Array{Float64,2}:
-#  -0.313208  -0.46376
+# [1] -0.2984246 -0.4964463
 ```
 ### iv. Estimation: Hamiltonian Monte Carlo
 Setup the necessary paramters including the gradients. The potential energy is the negative logposterior given by `U`, the gradient is `dU`; the kinetic energy is the standard Gaussian function given by `K`, with gradient `dK`. Thus,
 
-```julia
-U(theta::Array{Float64}) = - logpost(theta);
-K(p::Array{Float64}; Σ = eye(length(p))) = (p' * inv(Σ) * p) / 2;
-function dU(theta::Array{Float64}; alpha::Float64 = a, b::Float64 = eye_mat[1, 1])
-  [-alpha * sum(y - (theta[1] + theta[2] * x));
-   -alpha * sum((y - (theta[1] + theta[2] * x)) .* x)] + b * theta
-end
-dK(p::AbstractArray{Float64}; Σ::Array{Float64} = eye(length(p))) = inv(Σ) * p;
+```R
+U <- function(theta) - logpost(theta)
+K <- function(p, Sigma = diag(length(p))) (t(p) %*% solve(Sigma) %*% p) / 2
+dU <- function(theta, alpha = a, b = eye_mat[1, 1]) {
+    c(
+        - alpha * sum(y - (theta[1] + theta[2] * x)),
+        - alpha * sum((y - (theta[1] + theta[2] * x)) * x)
+    ) + b * theta
+}
+
+dK <- function (p, Sigma = diag(length(p))) solve(Sigma) %*% p
 ```
 Run the MCMC:
-```julia
-srand(123);
-HMC_object = HMC(U, K, dU, dK, zeros(2), 2);
-chain2 = mcmc(HMC_object, leapfrog_params = Dict([:ɛ => .09, :τ => 20]), r = 10000);
+```R
+set.seed(123)
+HMC_object <- HMC(U, K, dU, dK, c(0, 0), 2)
+chain2 <- mcmc(HMC_object, leapfrog_params = c(eps = .09, tau = 20), r = 10000)
 ```
 Extract the estimate
-```julia
-est2 = mapslices(mean, chain2[(burn_in + 1):thinning:end, :], [1]);
+```R
+est2 <- colMeans(chain2[seq((burn_in + 1), nrow(chain2), by = thinning), ])
 est2
-# 1×2 Array{Float64,2}:
-#  -0.307151  -0.458954
+# [1] -0.2977521 -0.5158439
 ```
 ### v. Estimation: Stochastic Gradient Hamiltonian Monte Carlo
 Define the gradient noise and other parameters of the SGHMC:
-```julia
-function dU_noise(theta::Array{Float64}; alpha::Float64 = a, b::Float64 = eye_mat[1, 1])
-  [-alpha * sum(y - (theta[1] + theta[2] * x));
-   -alpha * sum((y - (theta[1] + theta[2] * x)) .* x)] + b * theta + randn(2,1)
-end
+```R
+dU_noise <- function(theta, alpha = a, b = eye_mat[1, 1]) {
+    c(
+        - alpha * sum(y - (theta[1] + theta[2] * x)),
+        - alpha * sum((y - (theta[1] + theta[2] * x)) * x)
+    ) + b * theta + matrix(rnorm(2), 2, 1)
+}
 ```
 Run the MCMC:
-```julia
-srand(123);
-SGHMC_object = SGHMC(dU_noise, dK, eye(2), eye(2), eye(2), [0; 0], 2.);
-chain3 = mcmc(SGHMC_object, leapfrog_params = Dict([:ɛ => .09, :τ => 20]), r = 10000);
+```R
+set.seed(123)
+SGHMC_object <- SGHMC(dU_noise, dK, diag(2), diag(2), diag(2), init_est = c(0, 0), 2)
+chain3 <- mcmc(SGHMC_object, leapfrog_params = c(eps = .09, tau = 20), r = 10000)
 ```
 Extract the estimate:
-```julia
-est3 = mapslices(mean, chain3[(burn_in + 1):thinning:end, :], [1]);
+```R
+est3 = colMeans(chain3[seq((burn_in + 1), nrow(chain3), by = thinning), ])
 est3
-# 1×2 Array{Float64,2}:
-#  -0.302745  -0.430272
+# [1] -0.2920243 -0.4729136
 ```
 Plot it
-```julia
-my_df_sghmc = my_df;
-my_df_sghmc[:Yhat] = mapslices(mean, chain3[(burn_in + 1):thinning:end, :], [1])[1] + mapslices(mean, chain3[(burn_in + 1):thinning:end, :], [1])[2] * my_df[:Independent];
+```R
+p0 <- xyplot(y ~ x, type = c("p", "g"), col = "black") %>%
+    update(xlab = "x", ylab = "y")
 
-for i in (burn_in + 1):thinning:10000
-    my_df_sghmc[Symbol("Yhat_Sample_" * string(i))] = chain3[i, 1] + chain3[i, 2] * my_df_sghmc[:Independent]
-end
+p1 <- histogram(chain3[, 1], col = "gray50", border = "white") %>%
+    update(xlab = expression(paste("Chain Values of ", w[0]))) %>%
+    update(panel = function (x, ...) {
+        panel.grid(-1, -1)
+        panel.histogram(x, ...)
+        panel.abline(v = w0, lty = 2, col = "black", lwd = 2)
+  })
 
-my_stack_sghmc = DataFrame(X = repeat(Array(my_df_sghmc[:Independent]), outer = length((burn_in + 1):thinning:10000)),
-                           Y = repeat(Array(my_df_sghmc[:Dependent]), outer = length((burn_in + 1):thinning:10000)),
-                           Var = Array(stack(my_df_sghmc[:, 4:end])[1]),
-                           Val = Array(stack(my_df_sghmc[:, 4:end])[2]));
-ch1cor_df = DataFrame(x = collect(0:1:(length(autocor(chain3[(burn_in + 1):thinning:10000, 1])) - 1)),
-                      y1 = autocor(chain3[(burn_in + 1):thinning:10000, 1]),
-                      y2 = autocor(chain3[(burn_in + 1):thinning:10000, 2]));
+p2 <- histogram(chain3[, 2], col = "gray50", border = "white") %>%
+    update(xlab = expression(paste("Chain Values of ", w[1]))) %>%
+    update(panel = function (x, ...) {
+        panel.grid(-1, -1)
+        panel.histogram(x, ...)
+        panel.abline(v = w1, lty = 2, col = "black", lwd = 2)
+  })
 
-p0 = plot(my_df, x = :Independent, y = :Dependent, Geom.point, style(default_point_size = .05cm), Guide.xlabel("Explanatory"), Guide.ylabel("Response"));
-p1 = plot(DataFrame(chain3), x = :x1, xintercept = [-.3], Geom.vline(color = colorant"white"), Geom.histogram(bincount = 30, density = true), Guide.xlabel("1st Parameter"), Guide.ylabel("Density"));
-p2 = plot(DataFrame(chain3), x = :x2, xintercept = [-.5], Geom.vline(color = colorant"white"), Geom.histogram(bincount = 30, density = true), Guide.xlabel("2nd Parameter"), Guide.ylabel("Density"));
-p3 = plot(DataFrame(chain3), x = collect(1:nrow(DataFrame(chain3))), y = :x1, yintercept = [-.3], Geom.hline(color = colorant"white"), Geom.line, Guide.xlabel("Iterations"), Guide.ylabel("1st Parameter Chain Values"));
-p4 = plot(DataFrame(chain3), x = collect(1:nrow(DataFrame(chain1))), y = :x2, yintercept = [-.5], Geom.hline(color = colorant"white"), Geom.line, Guide.xlabel("Iterations"), Guide.ylabel("2nd Parameter Chain Values"));
-p5 = plot(DataFrame(chain3), x = :x1, y = :x2, Geom.path, Geom.point, Guide.xlabel("1st Parameter Chain Values"), Guide.ylabel("2nd Parameter Chain Values"));
-p6 = plot(layer(my_df_sghmc, x = :Independent, y = :Yhat, Geom.line, style(default_color = colorant"white")),
-          layer(my_stack_sghmc, x = :X, y = :Val, group = :Var, Geom.line, style(default_color = colorant"orange")),
-          layer(my_df_sghmc, x = :Independent, y = :Dependent, Geom.point, style(default_point_size = .05cm)),
-          Guide.xlabel("Explanatory"), Guide.ylabel("Response and Predicted"));
-p7 = plot(ch1cor_df, x = :x, y = :y1, Geom.bar, Guide.xlabel("Lags"), Guide.ylabel("1st Parameter Autocorrelations"), Coord.cartesian(xmin = -1, xmax = 36, ymin = -.05, ymax = 1.05));
-p8 = plot(ch1cor_df, x = :x, y = :y2, Geom.bar,  Guide.xlabel("Lags"), Guide.ylabel("2nd Parameter Autocorrelations"), Coord.cartesian(xmin = -1, xmax = 36, ymin = -.05, ymax = 1.05));
+p3 <- xyplot(chain3[, 1] ~ 1:nrow(chain3[, ]), type = c("g", "l"), col = "gray50", lwd = 1) %>%
+    update(xlab = "Iterations", ylab = expression(paste("Chain Values of ", w[0]))) %>%
+    update(panel = function (x, y, ...) {
+        panel.xyplot(x, y, ...)
+        panel.abline(h = w0, col = "black", lty = 2, lwd = 2)
+  })
 
-vstack(hstack(p0, p1, p2), hstack(p3, p4, p5), hstack(p6, p7, p8))
+p4 <- xyplot(chain3[, 2] ~ 1:nrow(chain3[,]), type = c("g", "l"), col = "gray50", lwd = 1) %>%
+    update(xlab = "Iterations", ylab = expression(paste("Chain Values of ", w[1]))) %>%
+    update(panel = function (x, y, ...) {
+        panel.xyplot(x, y, ...)
+        panel.abline(h = w1, col = "black", lty = 2, lwd = 2)
+  })
+
+p5 <- xyplot(chain3[, 2] ~ chain3[, 1]) %>%
+    update(type = c("p", "g"), pch = 21, fill = 'white', col = "black") %>%
+    update(xlab = expression(paste("Chain Values of ", w[0]))) %>%
+    update(ylab = expression(paste("Chain Values of ", w[1]))) %>%
+    update(panel = function (x, y, ...) {
+        panel.xyplot(x, y, ...)
+    })
+
+p6 <- xyplot(y ~ x, col = "black", fill = "gray80", cex = 1.3, type = "p", pch = 21) %>% 
+    update(xlim = c(-1.1, 1.1), ylim = c(-1.1, 1.1), panel = function(x, y, ...) {
+        panel.grid(h = -1, v = -1)
+        xseq <- seq(-1, 1, length.out = 100)
+        for (i in seq((burn_in + 1), nrow(chain3), by = thinning)) {
+            yhat <- chain3[i, 1] + chain3[i, 2] * xseq
+            panel.xyplot(xseq, yhat, type = "l", col = "gray50")  
+        }
+        panel.xyplot(x, y, ...)
+        panel.xyplot(xseq, est3[1] + est3[2] * xseq, type = "l", col = "black", lwd = 2)
+  })
+
+acf1 <- acf(chain3[seq((burn_in + 1), nrow(chain3), by = thinning), 1], plot = FALSE)
+acf2 <- acf(chain3[seq((burn_in + 1), nrow(chain3), by = thinning), 2], plot = FALSE)
+p7 <- xyplot(acf1$acf ~ acf1$lag, type = c("h", "g"), lwd = 2, col = "black") %>%
+    update(xlab = "Lags", ylab = expression(paste("Autocorrelations of ", w[1])))
+
+p8 <- xyplot(acf2$acf ~ acf2$lag, type = c("h", "g"), lwd = 2, col = "black") %>%
+    update(xlab = "Lags", ylab = expression(paste("Autocorrelations of ", w[1])))
+
+png("~/Dropbox/MS THESIS/R/StochMCMC/figures/plot2.png", width = 2800, height = 3000, res = 200)
+grid.arrange(p0, p1, p2, p3, p4, p5, p6, p7, p8, ncol = 3)
+dev.off()
 ```
-![(Right) Triangular Membership Function](https://github.com/alstat/StochMCMC.jl/blob/master/figures/plot2.png)
+![(Right) Triangular Membership Function](https://github.com/alstat/StochMCMC.r/blob/master/figures/plot2.png)
 
 
 

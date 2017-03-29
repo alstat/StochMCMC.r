@@ -1,29 +1,19 @@
-#' Metropolis-Hasting
+#' Metropolis-Hasting Class
 #' @export
 #' 
 #' @description 
 #' This is MH
-setGeneric("mcmc", function(object, ...) {
-  standardGeneric("mcmc")
-})
+MH <- function(logposterior, proposal = default_proposal, init_est = matrix(0, 2, 1), d = 2) {
+  new("MH", logposterior = logposterior, proposal = proposal, init_est = init_est, d = d)
+}
 
-setMethod("mcmc", signature(object = "MH"),
-  function (object, r = 1e+3) {
-  out <- matrix(NA, r, object@d)
-  out[1, ] <- object@init_est
-
-  for (i in 1:(r - 1)) {
-    propose <- object@proposal(out[i, ])
-    probab <- exp(object@logposterior(propose) - object@logposterior(out[i, ]))
-
-    if (runif(1) < probab){
-      out[i + 1, ] <- propose
-    } else {
-      out[i + 1, ] <- out[i, ]
-    }
+sigmas <- c(1, 1)
+default_proposal <- function (theta) {
+  random <- numeric()
+  
+  for (i in 1:length(theta)) {
+    random[i] <- rnorm(1, theta[i], sigmas[i])
   }
-
-  out %>% return
-  }
-)
-
+  
+  random %>% return
+}
