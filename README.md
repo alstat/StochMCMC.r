@@ -78,50 +78,44 @@ P(w|[x, y]) ∝ P(w)L(w|[x, y], b)
 
 To start programming, define the probabilities
 ```julia
-"""
-The log prior function is given by the following codes:
-"""
-function logprior(theta::Array{Float64}; mu::Array{Float64} = zero_vec, s::Array{Float64} = eye_mat)
-  w0_prior = log(pdf(Normal(mu[1, 1], s[1, 1]), theta[1]))
-  w1_prior = log(pdf(Normal(mu[2, 1], s[2, 2]), theta[2]))
-   w_prior = [w0_prior w1_prior]
+# The log prior function is given by the following codes:
+logprior <- function(theta, mu = zero_vec, s = eye_mat) {
+    w0_prior <- dnorm(theta[1], mu[1, 1], s[1, 1], log = TRUE)
+    w1_prior <- dnorm(theta[2], mu[2, 1], s[2, 2], log = TRUE)
+    w_prior <- c(w0_prior, w1_prior)
 
-  return w_prior |> sum
-end
+    w_prior %>% sum %>% return
+}
 
-"""
-The log likelihood function is given by the following codes:
-"""
-function loglike(theta::Array{Float64}; alpha::Float64 = a, x::Array{Float64} = x, y::Array{Float64} = y)
-  yhat = theta[1] + theta[2] * x
+# The log likelihood function is given by the following codes:
+loglike <- function(theta, alpha = a) {
+    yhat <- theta[1] + theta[2] * x
 
-  likhood = Float64[]
-  for i in 1:length(yhat)
-    push!(likhood, log(pdf(Normal(yhat[i], alpha), y[i])))
-  end
+    likhood <- numeric()
+    for (i in 1:length(yhat)) {
+        likhood[i] <- dnorm(y[i], yhat[i], alpha, log = TRUE)
+    }
 
-  return likhood |> sum
-end
+    likhood %>% sum %>% return
+}
 
-"""
-The log posterior function is given by the following codes:
-"""
-function logpost(theta::Array{Float64})
-  loglike(theta, alpha = a, x = x, y = y) + logprior(theta, mu = zero_vec, s = eye_mat)
-end
+# The log posterior function is given by the following codes:
+logpost <- function(theta) {
+    loglike(theta, alpha = a) + logprior(theta, mu = zero_vec, s = eye_mat)
+}
 ```
 ### iii. Estimation: Metropolis-Hasting
 To start the estimation, define the necessary parameters for the Metropolis-Hasting algorithm
 ```julia
 # Hyperparameters
-zero_vec = zeros(2)
-eye_mat = eye(2)
+zero_vec <- c(0, 0)
+eye_mat <- diag(2)
 ```
 Run the MCMC:
 ```julia
-srand(123);
-mh_object = MH(logpost; init_est = zeros(2));
-chain1 = mcmc(mh_object, r = 10000);
+set.seed(123);
+mh_object <- MH(logpost, init_est = zeros(2))
+chain1 <- mcmc(mh_object, r = 10000)
 ```
 Extract the estimate
 ```julia
