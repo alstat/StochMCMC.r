@@ -135,6 +135,7 @@ setMethod("mcmc", signature(object = "SGHMC"), function(object,
   }
   
   x <- matrix(0, r, d)
+  x[1, ] = w
   B <- .5 * V * eps
   D <- sqrt(2 * (C - B) * eps)
   
@@ -152,7 +153,7 @@ setMethod("mcmc", signature(object = "SGHMC"), function(object,
     }
   }
   
-  for (i in 1:r) {
+  for (i in 1:(r - 1)) {
     p <- rnorm(d) %>% matrix
     
     for (j in 1:tau) {
@@ -160,7 +161,7 @@ setMethod("mcmc", signature(object = "SGHMC"), function(object,
       w <- w + dK(p) * eps
     }
     
-    x[i, ] <- w
+    x[i + 1, ] <- w
   }
   
   x %>% return
