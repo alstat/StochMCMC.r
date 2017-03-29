@@ -61,7 +61,7 @@ head(my_df)
 ```
 Next is to plot this data which can be done as follows:
 ```julia
-xyplot(Dependent ~ Independent, data = my_df)
+xyplot(Dependent ~ Independent, data = my_df, type = c("p", "g"), col = "black")
 ```
 
 ![(Right) Triangular Membership Function](https://github.com/alstat/StochMCMC.r/blob/master/figures/plot1.png)
@@ -240,9 +240,7 @@ p7 <- xyplot(acf1$acf ~ acf1$lag, type = c("h", "g"), lwd = 2, col = "black") %>
 p8 <- xyplot(acf2$acf ~ acf2$lag, type = c("h", "g"), lwd = 2, col = "black") %>%
     update(xlab = "Lags", ylab = expression(paste("Autocorrelations of ", w[1])))
 
-png("~/Dropbox/MS THESIS/R/StochMCMC/figures/plot2.png", width = 2800, height = 3000, res = 200)
 grid.arrange(p0, p1, p2, p3, p4, p5, p6, p7, p8, ncol = 3)
-dev.off()
 ```
 ![(Right) Triangular Membership Function](https://github.com/alstat/StochMCMC.r/blob/master/figures/plot2.png)
 
