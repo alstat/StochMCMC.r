@@ -124,7 +124,7 @@ burn_in <- 100;
 thinning <- 10;
 
 # Expetation of the Posterior
-est1 = colMeans(chain1[seq((burn_in + 1), nrow(chain1), by = thinning), ])
+est1 <- colMeans(chain1[seq((burn_in + 1), nrow(chain1), by = thinning), ])
 est1
 # [1] -0.2984246 -0.4964463
 ```
