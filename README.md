@@ -173,7 +173,7 @@ chain3 <- mcmc(SGHMC_object, leapfrog_params = c(eps = .09, tau = 20), r = 10000
 ```
 Extract the estimate:
 ```R
-est3 = colMeans(chain3[seq((burn_in + 1), nrow(chain3), by = thinning), ])
+est3 <- colMeans(chain3[seq((burn_in + 1), nrow(chain3), by = thinning), ])
 est3
 # [1] -0.2920243 -0.4729136
 ```
