@@ -1,0 +1,15 @@
+Package: StochMCMC
+Type: Package
+Title: Agricultural Land Use Evaluation System
+Version: 0.1.1
+Date: 2017-03-29
+Author: Al-Ahmadgaid B. Asaad <alasaadstat@gmail.com>
+Maintainer: Al-Ahmadgaid B. Asaad <alstated@gmail.com>
+Description: Stochastic Gradient Markov Chain Monte Carlo
+License: GPL-2
+LazyData: true
+Depends:
+    magrittr (>= 1.5)
+Imports:
+    magrittr
+RoxygenNote: 5.0.1
