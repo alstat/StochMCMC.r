@@ -79,8 +79,8 @@ Next is to plot this data which can be done as follows:
 	xyplot(Dependent ~ Independent, data = my_df, type = c("p", "g"), col = "black")
 
 .. image:: figures/plot1.png
-	:width: 60%
-	:align: left
+	:width: 80%
+	:align: center
 	:alt: alternate text
 
 
