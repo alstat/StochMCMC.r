@@ -36,7 +36,7 @@ In order to illustrate the modeling, the data is simulated from a simple linear 
 
 Data Simulation
 ~~~~~~~~~~~~~~~~~~~~~~~
-To do so, let `B = [w_0, w_1]' = [.2, -.9]', a = 1 / 5`. Generate 200 hypothetical data:
+To do so, let :code:`B = [w_0, w_1]' = [.2, -.9]', a = 1 / 5`. Generate 200 hypothetical data:
 
 .. code-block:: R
 
@@ -84,7 +84,7 @@ Next is to plot this data which can be done as follows:
 
 Setup Probabilities
 ~~~~~~~~~~~~~~~~~~
-In order to proceed with the Bayesian inference, the parameters of the model is considered to be random modeled by a standard Gaussian distribution. That is, `B ~ N(0, I)`, where `0` is the zero vector. The likelihood of the data is given by,
+In order to proceed with the Bayesian inference, the parameters of the model is considered to be random modeled by a standard Gaussian distribution. That is, :code:`B ~ N(0, I)`, where :code:`0` is the zero vector. The likelihood of the data is given by,
 
 .. code-block:: txt
 
@@ -158,7 +158,7 @@ Extract the estimate
 
 Hamiltonian Monte Carlo
 ~~~~~~~~~~~~~~~~~~~~~~
-Setup the necessary paramters including the gradients. The potential energy is the negative logposterior given by `U`, the gradient is `dU`; the kinetic energy is the standard Gaussian function given by `K`, with gradient `dK`. Thus,
+Setup the necessary paramters including the gradients. The potential energy is the negative logposterior given by :code:`U`, the gradient is :code:`dU`; the kinetic energy is the standard Gaussian function given by :code:`K`, with gradient :code:`dK`. Thus,
 
 .. code-block:: R
 
