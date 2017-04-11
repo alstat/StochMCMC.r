@@ -19,7 +19,7 @@ library(StochMCMC)
 ```
 
 ## Documentation
-The complete documentation is available at: http://stochmcmcjl.readthedocs.io/
+The complete documentation is available at: http://stochmcmcr.readthedocs.io/
 
 ---
 <table width=100%>
