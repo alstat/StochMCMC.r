@@ -81,6 +81,7 @@ Next is to plot this data which can be done as follows:
 .. image:: figures/plot1.png
 	:width: 60%
     :align: center
+    :alt: alternate text
 
 Setup Probabilities
 ~~~~~~~~~~~~~~~~~~
@@ -283,8 +284,8 @@ Plot it
 	    update(xlab = "Lags", ylab = expression(paste("Autocorrelations of ", w[1])))
 
 	grid.arrange(p0, p1, p2, p3, p4, p5, p6, p7, p8, ncol = 3)
-```
+
 .. image:: figures/plot2.png
 	:width: 100%
 	:align: center
-
+	:alt: alternate text
