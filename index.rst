@@ -80,7 +80,7 @@ Next is to plot this data which can be done as follows:
 
 .. image:: figures/plot1.png
 	:width: 60%
-	:align: center
+	:align: left
 	:alt: alternate text
 
 Setup Probabilities
