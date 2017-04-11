@@ -79,9 +79,9 @@ Next is to plot this data which can be done as follows:
 	xyplot(Dependent ~ Independent, data = my_df, type = c("p", "g"), col = "black")
 
 .. image:: figures/plot1.png
-	:width: 60%
-    :align: center
-    :alt: alternate text
+	:width: 100%
+	:align: center
+	:alt: alternate text
 
 Setup Probabilities
 ~~~~~~~~~~~~~~~~~~
@@ -222,6 +222,7 @@ Extract the estimate:
 Plot it
 
 .. code-block:: R
+
 	p0 <- xyplot(y ~ x, type = c("p", "g"), col = "black") %>%
 	    update(xlab = "x", ylab = "y")
 
