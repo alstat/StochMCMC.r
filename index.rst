@@ -83,6 +83,7 @@ Next is to plot this data which can be done as follows:
 	:align: left
 	:alt: alternate text
 
+
 Setup Probabilities
 ~~~~~~~~~~~~~~~~~~
 In order to proceed with the Bayesian inference, the parameters of the model is considered to be random modeled by a standard Gaussian distribution. That is, :code:`B ~ N(0, I)`, where :code:`0` is the zero vector. The likelihood of the data is given by,
