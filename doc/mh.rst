@@ -19,16 +19,16 @@ Implementation of the Metropolis-Hasting sampler for Bayesian inference.
         Returns a ``MH`` type object.
 
     **Example**
-
+      
 	In order to illustrate the modeling, the data is simulated from a simple linear regression expectation function. That is the model is given by
 
-	.. code-block:: R
+	.. code-block:: txt 
 
 		y_i = w_0 + w_1 x_i + e_i,   e_i ~ N(0, 1 / a)
 
 	To do so, let :code:`B = [w_0, w_1]' = [.2, -.9]', a = 1 / 5`. Generate 200 hypothetical data:
 
-	.. code-block:: R
+	.. code-block:: txt
 
 		library(gridExtra)
 		library(lattice)
@@ -51,7 +51,7 @@ Implementation of the Metropolis-Hasting sampler for Bayesian inference.
 
 	To view the head of the data, run the following:
 
-	.. code-block:: julia
+	.. code-block:: txt
 
 		head(my_df)
 		#   Independent Dependent
@@ -67,17 +67,14 @@ Implementation of the Metropolis-Hasting sampler for Bayesian inference.
 	.. code-block:: julia
 
 		xyplot(Dependent ~ Independent, data = my_df, type = c("p", "g"), col = "black")
-	
+
 	.. image:: figures/plot1.png
 		:width: 80%
 		:align: center
 		:alt: alternate text
 
-
-	Setup Probabilities
-	~~~~~~~~~~~~~~~~~~
-	In order to proceed with the Bayesian inference, the parameters of the model is considered to be random modeled by 
-	a standard Gaussian distribution. That is, :code:`B ~ N(0, I)`, where :code:`0` is the zero vector. The likelihood of the data is given by,
+	In order to proceed with the Bayesian inference, the parameters of the model is considered to be random modeled by a 
+	standard Gaussian distribution. That is, :code:`B ~ N(0, I)`, where :code:`0` is the zero vector. The likelihood of the data is given by,
 
 	.. code-block:: txt
 
@@ -119,9 +116,6 @@ Implementation of the Metropolis-Hasting sampler for Bayesian inference.
 		    loglike(theta, alpha = a) + logprior(theta, mu = zero_vec, s = eye_mat)
 		}
 
-
-	Metropolis-Hasting
-	~~~~~~~~~~~~~~~~~~~
 	To start the estimation, define the necessary parameters for the Metropolis-Hasting algorithm
 
 	.. code-block:: R
