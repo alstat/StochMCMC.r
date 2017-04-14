@@ -1,162 +1,48 @@
-*********
-StochMCMC.r
-*********
-*A R package for Stochastic Gradient Markov Chain Monte Carlo*
+****
+StochMCMC.jl
+****
 
-This package is part of my master's thesis entitled **Bayesian Autoregressive Distributed Lag** *via* **Stochastic Gradient Hamiltonian Monte Carlo** or BADL-SGHMC. However as the title says, this package aims to accomodate other Stochastic Gradient MCMCs in the near future. At the latest, the following are the MCMC algorithms available:
+:Author: Al-Ahmadgaid B. Asaad (alasaadstat@gmail.com | http://alstatr.blogspot.com/)
+:Requires: julia releases 0.4.1 or later
+:Date: |today|
+:License: `MIT <https://github.com/alstat/StochMCMC.jl/blob/master/LICENSE.md>`_
+:Website: https://github.com/alstat/StochMCMC.jl
 
-1. Metropolis-Hasting
-2. Hamiltonian Monte Carlo
-3. Stochastic Gradient Hamiltonian Monte Carlo
+
+A julia package for Stochastic Gradient Markov Chain Monte Carlo. The package is part of my master's thesis entitled
+**Bayesian Autoregressive Distributed Lag** *via* **Stochastic Gradient Hamiltonian Monte Carlo** or **BADL-SGHMC**,
+under the supervision of **Dr. Joselito C. Magadia** of School of Statistics, University of the Philippines Diliman.
+This work aims to accommodate other Stochastic Gradient MCMCs in the near future.
 
 Installation
-==================
-To install the package, simply run the following codes
-
-.. code-block:: R
-
-	library(devtools)
-	install_github("alstat/StochMCMC.r")
-
-And to load the package:
-
-.. code-block:: R
-	
-	library(StochMCMC)
-
-Tutorial
-==================
-Bayesian Linear Regression
----------------------
-In order to illustrate the modeling, the data is simulated from a simple linear regression expectation function. That is the model is given by
-
-.. code-block:: R
-
-	y_i = w_0 + w_1 x_i + e_i,   e_i ~ N(0, 1 / a)
-
-Data Simulation
-~~~~~~~~~~~~~~~~~~~~~~~
-To do so, let :code:`B = [w_0, w_1]' = [.2, -.9]', a = 1 / 5`. Generate 200 hypothetical data:
-
-.. code-block:: R
-
-	library(gridExtra)
-	library(lattice)
-	library(StochMCMC)
-
-	set.seed(123)
-
-	# Define data parameters
-	w0 <- -.3; w1 <- -.5; stdev <- 5.; a <- 1 / stdev
-
-	# Generate Hypothetical Data
-	n <- 200;
-	x <- runif(n, -1, 1);
-	A <- cbind(1, x);
-	B <- rbind(w0, w1);
-	f <- A %*% B;
-	y <- f + rnorm(n, 0, a);
-
-	my_df = data.frame(Independent = round(x, 4), Dependent = round(y, 4));
-
-To view the head of the data, run the following:
+============
+To install the package, run the following
 
 .. code-block:: julia
 
-	head(my_df)
-	#   Independent Dependent
-	# 1     -0.4248   -0.2297
-	# 2      0.5766   -0.5369
-	# 3     -0.1820   -0.2583
-	# 4      0.7660   -0.7525
-	# 5      0.8809   -0.9308
-	# 6     -0.9089    0.1454
+    Pkg.clone("https://github.com/alstat/StochMCMC.jl")
 
-Next is to plot this data which can be done as follows:
+And to load the package, run
 
 .. code-block:: julia
 
-	xyplot(Dependent ~ Independent, data = my_df, type = c("p", "g"), col = "black")
+    using StochMCMC
 
-.. image:: figures/plot1.png
-	:width: 80%
-	:align: center
-	:alt: alternate text
+Contents
+~~~~~~~~~~~~~~
+
+.. toctree::
+    :maxdepth: 2
+
+    mh.rst
+    hmc.rst
+    sghmc.rst
 
 
-Setup Probabilities
-~~~~~~~~~~~~~~~~~~
-In order to proceed with the Bayesian inference, the parameters of the model is considered to be random modeled by a standard Gaussian distribution. That is, :code:`B ~ N(0, I)`, where :code:`0` is the zero vector. The likelihood of the data is given by,
+Indices
+~~~~~~~~~~
 
-.. code-block:: txt
-
-	L(w|[x, y], b) = ∏_{i=1}^n N([x_i, y_i]|w, b)
-
-Thus the posterior is given by,
-
-.. code-block:: txt
-
-	P(w|[x, y]) ∝ P(w)L(w|[x, y], b)
-
-To start programming, define the probabilities
-
-.. code-block:: R
-
-	# The log prior function is given by the following codes:
-	logprior <- function(theta, mu = zero_vec, s = eye_mat) {
-	    w0_prior <- dnorm(theta[1], mu[1], s[1, 1], log = TRUE)
-	    w1_prior <- dnorm(theta[2], mu[2], s[2, 2], log = TRUE)
-	    w_prior <- c(w0_prior, w1_prior)
-
-	    w_prior %>% sum %>% return
-	}
-
-	# The log likelihood function is given by the following codes:
-	loglike <- function(theta, alpha = a) {
-	    yhat <- theta[1] + theta[2] * x
-
-	    likhood <- numeric()
-	    for (i in 1:length(yhat)) {
-	        likhood[i] <- dnorm(y[i], yhat[i], alpha, log = TRUE)
-	    }
-
-	    likhood %>% sum %>% return
-	}
-
-	# The log posterior function is given by the following codes:
-	logpost <- function(theta) {
-	    loglike(theta, alpha = a) + logprior(theta, mu = zero_vec, s = eye_mat)
-	}
-
-Metropolis-Hasting
-~~~~~~~~~~~~~~~~~~~
-To start the estimation, define the necessary parameters for the Metropolis-Hasting algorithm
-
-.. code-block:: R
-
-	# Hyperparameters
-	zero_vec <- c(0, 0)
-	eye_mat <- diag(2)
-
-Run the MCMC:
-
-.. code-block:: R
-
-	set.seed(123);
-	mh_object <- MH(logpost, init_est = c(0, 0))
-	chain1 <- mcmc(mh_object, r = 10000)
-
-Extract the estimate
-
-.. code-block:: R
-
-	burn_in <- 100;
-	thinning <- 10;
-
-	# Expetation of the Posterior
-	est1 <- colMeans(chain1[seq((burn_in + 1), nrow(chain1), by = thinning), ])
-	est1
-	# [1] -0.2984246 -0.4964463
+* :ref:`genindex`
 
 Hamiltonian Monte Carlo
 ~~~~~~~~~~~~~~~~~~~~~~
