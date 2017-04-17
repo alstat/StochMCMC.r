@@ -23,7 +23,7 @@ The complete documentation is available at: http://stochmcmcr.readthedocs.io/
 
 ---
 <table width=100%>
-<tr><td>author:</td><td><b>Al-Ahmadgaid B. Asaad</b></td><td>thesis supervisor:</td><td><b>Joselito C. Magadia, Ph.D.</b></td></tr>
+<tr><td>author:</td><td><b>Al-Ahmadgaid B. Asaad</b></td><td>thesis advisor:</td><td><b>Joselito C. Magadia, Ph.D.</b></td></tr>
 <tr><td>email:</td><td>alasaadstat@gmail.com</td><td>website:</td><td>http://stat.upd.edu.ph/</td></tr>
 <tr><td>blog:</td><td>http://alstatr.blogspot.com/</td></tr>
 </table>

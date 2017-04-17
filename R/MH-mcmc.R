@@ -2,7 +2,7 @@
 #' @export
 #' 
 #' @description 
-#' This is MH
+#' Markov Chain Monte Carlo function in R
 #' 
 setGeneric("mcmc", function(object, ...) {
   standardGeneric("mcmc")
