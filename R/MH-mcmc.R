@@ -4,6 +4,7 @@
 #' @description 
 #' Markov Chain Monte Carlo function in R
 #' 
+#' @params object MCMC object such as MH, HMC and SGHMC.
 setGeneric("mcmc", function(object, ...) {
   standardGeneric("mcmc")
 })
