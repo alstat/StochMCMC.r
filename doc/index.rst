@@ -8,6 +8,7 @@ StochMCMC.jl
 :License: `MIT <https://github.com/alstat/StochMCMC.jl/blob/master/LICENSE.md>`_
 :Website: https://github.com/alstat/StochMCMC.jl
 
+(Under heavy construction, Target Finish Date on Monday 12pm - Philippine Time)
 
 A julia package for Stochastic Gradient Markov Chain Monte Carlo. The package is part of my master's thesis entitled
 **Bayesian Autoregressive Distributed Lag** *via* **Stochastic Gradient Hamiltonian Monte Carlo** or **BADL-SGHMC**,
